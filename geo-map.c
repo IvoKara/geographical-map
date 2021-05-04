@@ -37,6 +37,41 @@ void print_terrain(terrain ter)
     }
 }
 
+void print_terr_type(terrain terr)
+{
+    printf("Map of types:\n");
+    for(int i = 0; i < terr.heightMeter; i++)
+    {
+        for(int j = 0; j < terr.widthMeter; j++)
+            printf(" %d", terr.cells[i][j].type);
+        printf("\n");
+    }
+}
+
+void print_terr_height(terrain terr)
+{
+    float longest = 0;
+    for(int i = 0; i < terr.heightMeter; i++)
+        for(int j = 0; j < terr.widthMeter; j++)
+            if(longest < terr.cells[i][j].height)
+                longest = terr.cells[i][j].height;
+                
+    int len = 0;
+    while((int)longest > 0)
+    {
+        longest = longest / 10;
+        len++;
+    }
+
+    printf("Map of heights:\n");
+    for(int i = 0; i < terr.heightMeter; i++)
+    {
+        for(int j = 0; j < terr.widthMeter; j++)
+            printf("%*.2f ", len+4, terr.cells[i][j].height);
+        printf("\n");
+    }
+}
+
 void input_str(char *str)
 {
     char c = 0;
@@ -101,7 +136,7 @@ void free_items(terrain *terr)
 
 void write_file(char *filename, terrain *ter)
 {
-    FILE *fp = fopen(filename, "ab");
+    FILE *fp = fopen(filename, "wb");
     if(fp == NULL)
     {
         perror("Cannot open file");
@@ -187,22 +222,92 @@ terrain *read_file(char *filename)
     return terr;
 }
 
+void ask_proceed()
+{
+    int c;
+    printf("Terrain data empty\n");
+    while(1)
+    {
+        printf("Insert new data? y/n(exit program) ");
+        c = getchar();
+        if(c == 'y')
+            break;
+        if(c == 'n')
+            exit(0);
+    }
+}
+
+void new_terrain()
+{
+    terrain terr;
+    init_terrain(&terr);
+    getchar();
+    write_file("terrain.dat", &terr);
+    free_items(&terr);
+}
+
 int main()
 {
-    terrain sofia;
-    init_terrain(&sofia);
-
-    write_file("geo.bin", &sofia);
-    
-    terrain *test = read_file("geo.bin");
-    print_terrain(*test);
-
-    free_items(&sofia);
-    free_items(test);
-    free(test);
-    // choose terrain 
     // choose option of the terrain 
+    FILE *dat = fopen("terrain.dat", "rb");
+    if(dat != NULL)
+    {
+        fseek(dat , 0, SEEK_END);
+        if(ftell(dat) == 0)
+        {
+            fclose(dat);
+            ask_proceed();
+            new_terrain();
+        }
+    }
+    else
+    {
+        ask_proceed();
+        new_terrain();
+    }
 
 
+    char c = 0;
+    terrain *terr = read_file("terrain.dat");
+    while(1)
+    {
+        printf("+------------------------------------+\n");
+        printf("| Choose options:                    |\n");
+        printf("|  1 - View terrain as terrain types |\n");
+        printf("|  2 - View terrain as heights       |\n");
+        printf("|  3 - Enter new terrain             |\n");
+        printf("|  4 - Exit                          |\n");
+        printf("+------------------------------------+\n");
+        printf("   |\n");
+        printf("   +-> ");
+        c = getchar();
+        getchar();
+        switch(c)
+        {
+            case '1':
+                printf("\n");
+                print_terr_type(*terr);
+                printf("\n");
+                break;
+            case '2':
+                printf("\n");
+                print_terr_height(*terr);
+                printf("\n");
+                break;
+            case '3':
+                new_terrain();
+                terr = read_file("terrain.dat");
+                break;
+        }
+        if(c == '4')
+        {
+            free_items(terr);
+            free(terr);
+            printf("Bye.\n");
+            break;
+        }
+
+    }
+    
     return 0;
 }
