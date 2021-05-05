@@ -442,7 +442,7 @@ int main()
                 printf("\n");
                 printf("Map of types %dx%d:\n", 
                     terr->heightMeter, terr->widthMeter);
-                print_terr_type(*terr, 0    );
+                print_terr_type(*terr, 0);
                 printf("\n");
                 break;
             case '2':
@@ -457,9 +457,9 @@ int main()
                 terr = read_file("terrain.dat");
                 break;
             case '4':
-                /* to be added */
                 printf("\n");
                 create_road(terr);
+                getchar();
                 printf("\n");
                 break;
             case '5':
@@ -473,7 +473,6 @@ int main()
             printf("Bye.\n");
             break;
         }
-
     }
     
     return 0;
