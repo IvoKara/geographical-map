@@ -22,29 +22,72 @@ struct terr_list_t {
 };
 typedef struct terr_list_t terr_list;
 
-void print_terrain(terrain ter)
+int digits_in_number(int num)
 {
-    printf("%dx%d\n", ter.widthMeter, ter.heightMeter);
-    for(int i = 0; i < ter.heightMeter; i++)
+    int len = 0;
+    while((int)num > 0)
     {
-        for(int j = 0; j < ter.widthMeter; j++)
-        {
-            printf("%dh %dw: ", i, j);
-            printf("%.2f ", ter.cells[i][j].height);
-            printf("%d ", ter.cells[i][j].type);
-            printf("%.2f\n", ter.cells[i][j].attendance);
-        }
+        num = num / 10;
+        len++;
     }
+    
+    return len;
 }
 
-void print_terr_type(terrain terr)
+void print_terr_type(terrain terr, int use_coord)
 {
-    printf("Map of types:\n");
+    int wdigs = digits_in_number(terr.widthMeter);
+    int hdigs = digits_in_number(terr.heightMeter);
+    
+    if(use_coord)
+    {
+        int count = 0;
+        int len = terr.widthMeter*2 - 1;
+        char dashes[len+1];
+        
+        memset(dashes, '-', len);
+        dashes[len] = '\0';
+
+        printf("%*c", hdigs+2, ' ');
+        for(int i = 0; i < len; i++)
+        {
+            if(i % 10 == 0)
+            {
+                printf("%-*d", wdigs, count);
+                dashes[i] = '+';
+                count += 5;
+                i += (wdigs-1);
+            }
+            else
+                printf(" ");
+        }
+        printf("  x\n");
+        printf("%*c%s>\n", hdigs+2, '.', dashes);
+    }
+
     for(int i = 0; i < terr.heightMeter; i++)
     {
+        if(use_coord)
+        {
+            if(i % 5 == 0)
+            {
+                printf("%*d +",hdigs, i);
+            }
+            else
+                printf("%*c",hdigs+2, '|');
+        }
+        else
+            printf(" ");     
+
         for(int j = 0; j < terr.widthMeter; j++)
-            printf(" %d", terr.cells[i][j].type);
+            printf("%d ", terr.cells[i][j].type);
         printf("\n");
+    }
+
+    if(use_coord)
+    {
+        printf("%*c\n", hdigs+2, 'v');
+        printf("%*c\n", hdigs+1, 'y');
     }
 }
 
@@ -56,14 +99,8 @@ void print_terr_height(terrain terr)
             if(longest < terr.cells[i][j].height)
                 longest = terr.cells[i][j].height;
                 
-    int len = 0;
-    while((int)longest > 0)
-    {
-        longest = longest / 10;
-        len++;
-    }
+    int len = digits_in_number(longest);
 
-    printf("Map of heights:\n");
     for(int i = 0; i < terr.heightMeter; i++)
     {
         for(int j = 0; j < terr.widthMeter; j++)
@@ -72,35 +109,13 @@ void print_terr_height(terrain terr)
     }
 }
 
-void input_str(char *str)
-{
-    char c = 0;
-    int count = 0;
-    char *temp = NULL;
-    while(1)
-    {
-        c = getchar();
-        temp = (char*) realloc(str, ++count*sizeof(char));
-        str = temp;
-        if(c == '\n')
-        {
-            str[count-1] = '\0';
-            break;
-        }
-        str[count-1] = c;
-    }
-}
-
 void init_terrain(terrain *ter)
 {
     int *width = &(ter->widthMeter);
     int *height = &(ter->heightMeter);
 
-    printf("New Terrain width in meters: ");
-    scanf("%d", width);
-
-    printf("New Terrain height in meters: ");
-    scanf("%d", height);
+    printf("New Terrain height X width in meters: ");
+    scanf("%d %d", height, width);
 
     cell **temp = (cell**) malloc((*height)*sizeof(cell*));
     for(int i = 0; i < *height; i++)
@@ -112,14 +127,11 @@ void init_terrain(terrain *ter)
         {
             printf("Coordinates %dh %dw data\n", i, j);
             
-            printf("cell height - ");
-            scanf("%f", &(temp[i][j].height));
-
-            printf("cell type - ");
-            scanf("%d", &(temp[i][j].type));
-
-            printf("cell attendance for one day - ");
-            scanf("%f", &(temp[i][j].attendance));
+            printf("height / type / attendance per day: ");
+            scanf("%f %d %f", 
+                &(temp[i][j].height),
+                &(temp[i][j].type),
+                &(temp[i][j].attendance));
         }
     }
     
@@ -246,6 +258,63 @@ void new_terrain()
     free_items(&terr);
 }
 
+int create_road(terrain *ter)
+{
+    print_terr_type(*ter, 1);
+
+    int x, y;
+    int count = 0;
+    /*int Xmax = ter->widthMeter;
+    int Ymax = ter->heightMeter;
+    printf("Type -1 coordinate to stop (either for \'x\' or \'y\'\n");
+    do
+    {
+        printf("Choose coordinates (x, y): ");
+        scanf("%d %d", &x, &y);
+
+        if(x > Xmax)
+        {
+            printf("\'x\' is out of range\n");
+            continue;
+        }
+        else if(x < -1)
+        {
+            printf("\'x\' must be positive (Type \'-1\' to stop)\n");
+            continue;
+        }
+
+        if(y > Ymax)
+        {
+            printf("\'y\' is out of range\n");
+            continue;
+        }
+        else if(y < -1)
+        {
+            printf("\'y\' must be positive (Type \'-1\' to stop)\n");
+            continue;
+        }
+
+        if(count == 0 && (x != 0 && y != 0))
+        {
+            printf("Cannot start road from there.");
+            continue;
+        {}
+
+        if(ter->cells[y][x] > 1)
+        {
+            printf();
+        }
+        else if(ter->cells[y][x] == 3)
+        {
+            printf("Already road here. Continue from that point\n");
+        }
+
+        count++;
+    } while(x != -1 && y != -1);*/
+
+    return count;
+}
+
 int main()
 {
     // choose option of the terrain 
@@ -266,7 +335,6 @@ int main()
         new_terrain();
     }
 
-
     char c = 0;
     terrain *terr = read_file("terrain.dat");
     while(1)
@@ -276,21 +344,28 @@ int main()
         printf("|  1 - View terrain as terrain types |\n");
         printf("|  2 - View terrain as heights       |\n");
         printf("|  3 - Enter new terrain             |\n");
-        printf("|  4 - Exit                          |\n");
+        printf("|  4 - Create road                   |\n");
+        printf("|  5 - Biker jumps                   |\n");
+        printf("|  6 - Exit                          |\n");
         printf("+------------------------------------+\n");
         printf("   |\n");
         printf("   +-> ");
+
         c = getchar();
         getchar();
         switch(c)
         {
             case '1':
                 printf("\n");
-                print_terr_type(*terr);
+                printf("Map of types %dx%d:\n", 
+                    terr->heightMeter, terr->widthMeter);
+                print_terr_type(*terr, 0    );
                 printf("\n");
                 break;
             case '2':
                 printf("\n");
+                printf("Map of heights %dx%d:\n", 
+                    terr->heightMeter, terr->widthMeter);
                 print_terr_height(*terr);
                 printf("\n");
                 break;
@@ -298,8 +373,17 @@ int main()
                 new_terrain();
                 terr = read_file("terrain.dat");
                 break;
+            case '4':
+                /* to be added */
+                printf("\n");
+                create_road(terr);
+                printf("\n");
+                break;
+            case '5':
+                /* to be added */
+                break;
         }
-        if(c == '4')
+        if(c == '6')
         {
             free_items(terr);
             free(terr);
