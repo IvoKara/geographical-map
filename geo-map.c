@@ -114,8 +114,20 @@ void init_terrain(terrain *ter)
     int *width = &(ter->widthMeter);
     int *height = &(ter->heightMeter);
 
-    printf("New Terrain height X width in meters: ");
-    scanf("%d %d", height, width);
+    do
+    {
+        printf("New Terrain height X width in meters: ");
+        scanf("%d %d", height, width);
+        if(*height <= 0 || *width <= 0)
+        {
+            if(*height <= 0)
+                printf("*height cannot be negative or zero\n");
+            if(*width <= 0)
+                printf("*width cannot be negative or zero\n");   
+        }
+        
+    } while (*height <= 0 || *width <= 0);
+    
 
     cell **temp = (cell**) malloc((*height)*sizeof(cell*));
     for(int i = 0; i < *height; i++)
@@ -125,13 +137,34 @@ void init_terrain(terrain *ter)
     {
         for(int j = 0; j < *width; j++)
         {
-            printf("Coordinates %dh %dw data\n", i, j);
+            printf("\n| Coordinates %dh %dw data\n", i, j);
             
-            printf("height / type / attendance per day: ");
-            scanf("%f %d %f", 
-                &(temp[i][j].height),
-                &(temp[i][j].type),
-                &(temp[i][j].attendance));
+            int err;
+            do 
+            {
+                err = 0;
+                printf("height / type / attendance per day: ");
+                scanf("%f %d %f", 
+                    &(temp[i][j].height),
+                    &(temp[i][j].type),
+                    &(temp[i][j].attendance));
+                if(temp[i][j].height <= 0)
+                {
+                    printf("*height cannot be negative or zero\n");
+                    err = 1;
+                }
+                if(temp[i][j].type < 0 || temp[i][j].type > 4)
+                {
+                    printf("*type must be between 0 and 4\n");
+                    err = 1;
+                }
+                if(temp[i][j].attendance <= 0)
+                {
+                    printf("*attendance cannot be negative or zero\n");
+                    err = 1;
+                }
+            } while(err);
+            
         }
     }
     
@@ -288,18 +321,18 @@ int create_road(terrain *ter)
         if(x > Xmax || y > Ymax)
         {
             if(x > Xmax)
-                printf("\'x\' is out of range (Max %d)\n", Xmax);
+                printf("*\'x\' is out of range (Max %d)\n", Xmax);
             if(y > Ymax)
-                printf("\'y\' is out of range (Max %d)\n", Ymax);
+                printf("*\'y\' is out of range (Max %d)\n", Ymax);
             continue;
         }
 
         if(x < -1 || y < -1)
         {
             if(x < -1)
-                printf("\'x\' must be positive (Type \'-1\' to stop)\n");
+                printf("*\'x\' must be positive (Type \'-1\' to stop)\n");
             if(y < -1)
-                printf("\'y\' must be positive (Type \'-1\' to stop)\n");
+                printf("*\'y\' must be positive (Type \'-1\' to stop)\n");
             continue;
         }
 
@@ -307,12 +340,12 @@ int create_road(terrain *ter)
         {
             if(x == befX && y == befY)
             {
-                printf("You are already on that point. Road built there.\n");
+                printf("*You are already on that point. Road built there.\n");
                 continue;
             }
             else if((x < befX-1 || x > befX+1) || (y < befY-1 || y > befY+1))
             {
-                printf("Too far away. Need to be near current point (%d, %d)\n",
+                printf("*Too far away. Need to be near current point (%d, %d)\n",
                     befX, befY);
                 continue;
             }
@@ -321,7 +354,7 @@ int create_road(terrain *ter)
         {
             if((x != 0 && y != 0) && (x != Xmax && y != Ymax))
             {
-                printf("Cannot start from there. Need to start from \'borders\'.\n");
+                printf("*Cannot start from there. Need to start from \'borders\'.\n");
                 continue;
             }
         }
@@ -337,7 +370,7 @@ int create_road(terrain *ter)
         }
         else if(ter->cells[y][x].type > 1)
         {
-            printf("Cannot build road over ");
+            printf("*Cannot build road over ");
             switch (ter->cells[y][x].type)
             {
             case 2:
