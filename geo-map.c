@@ -87,7 +87,7 @@ void print_terr_type(terrain terr, int use_coord)
     if(use_coord)
     {
         printf("%*c\n", hdigs+2, 'v');
-        printf("%*c\n", hdigs+1, 'y');
+        printf("%*c\n", hdigs, 'y');
     }
 }
 
@@ -260,57 +260,107 @@ void new_terrain()
 
 int create_road(terrain *ter)
 {
-    print_terr_type(*ter, 1);
 
     int x, y;
+    int befX, befY;
     int count = 0;
-    /*int Xmax = ter->widthMeter;
-    int Ymax = ter->heightMeter;
-    printf("Type -1 coordinate to stop (either for \'x\' or \'y\'\n");
+    int Xmax = ter->widthMeter-1;
+    int Ymax = ter->heightMeter-1;
+
+    printf("Build road:\n");
+    print_terr_type(*ter, 1);
+    printf("\n");
+    printf("Type -1 coordinate to stop (either for \'x\' or \'y\')\n");
     do
     {
-        printf("Choose coordinates (x, y): ");
+        if(count == 0)
+            printf("Choose starting coordinates (x, y): ");
+        else if(count != 0)
+            printf("Choose next coordinates of (%d, %d): ", befX, befY);
         scanf("%d %d", &x, &y);
 
-        if(x > Xmax)
+        if(x == -1 || y == -1)
         {
-            printf("\'x\' is out of range\n");
-            continue;
+            printf("Writing road to file.\n");
+            break;
         }
-        else if(x < -1)
+
+        if(x > Xmax || y > Ymax)
         {
-            printf("\'x\' must be positive (Type \'-1\' to stop)\n");
+            if(x > Xmax)
+                printf("\'x\' is out of range (Max %d)\n", Xmax);
+            if(y > Ymax)
+                printf("\'y\' is out of range (Max %d)\n", Ymax);
             continue;
         }
 
-        if(y > Ymax)
+        if(x < -1 || y < -1)
         {
-            printf("\'y\' is out of range\n");
-            continue;
-        }
-        else if(y < -1)
-        {
-            printf("\'y\' must be positive (Type \'-1\' to stop)\n");
+            if(x < -1)
+                printf("\'x\' must be positive (Type \'-1\' to stop)\n");
+            if(y < -1)
+                printf("\'y\' must be positive (Type \'-1\' to stop)\n");
             continue;
         }
 
-        if(count == 0 && (x != 0 && y != 0))
+        if(count != 0)
         {
-            printf("Cannot start road from there.");
-            continue;
-        {}
-
-        if(ter->cells[y][x] > 1)
-        {
-            printf();
+            if(x == befX && y == befY)
+            {
+                printf("You are already on that point. Road built there.\n");
+                continue;
+            }
+            else if((x < befX-1 || x > befX+1) || (y < befY-1 || y > befY+1))
+            {
+                printf("Too far away. Need to be near current point (%d, %d)\n",
+                    befX, befY);
+                continue;
+            }
         }
-        else if(ter->cells[y][x] == 3)
+        else if(count == 0)
+        {
+            if((x != 0 && y != 0) && (x != Xmax && y != Ymax))
+            {
+                printf("Cannot start from there. Need to start from \'borders\'.\n");
+                continue;
+            }
+        }
+
+        if(ter->cells[y][x].type == 3)
         {
             printf("Already road here. Continue from that point\n");
+            befX = x;
+            befY = y;
+            if(count == 0)
+                count++;
+            continue;
+        }
+        else if(ter->cells[y][x].type > 1)
+        {
+            printf("Cannot build road over ");
+            switch (ter->cells[y][x].type)
+            {
+            case 2:
+                printf("water\n");
+                break;
+            
+            case 4:
+                printf("building\n");
+                break;
+            }
+            continue;
         }
 
+        ter->cells[y][x].type = 3;
         count++;
-    } while(x != -1 && y != -1);*/
+        befX = x;
+        befY = y;
+        printf("________________\nNew map (types):\n");
+        print_terr_type(*ter, 1);
+        printf("\n");        
+    } while(x != -1 && y != -1);
+
+    write_file("terrain.dat", ter);
 
     return count;
 }
@@ -344,7 +394,7 @@ int main()
         printf("|  1 - View terrain as terrain types |\n");
         printf("|  2 - View terrain as heights       |\n");
         printf("|  3 - Enter new terrain             |\n");
-        printf("|  4 - Create road                   |\n");
+        printf("|  4 - Build road                    |\n");
         printf("|  5 - Biker jumps                   |\n");
         printf("|  6 - Exit                          |\n");
         printf("+------------------------------------+\n");
