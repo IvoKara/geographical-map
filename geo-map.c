@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+
+#define PI 3.14159265
 
 struct cell_t {
     float height;
@@ -15,12 +18,6 @@ struct terrain_t {
     cell **cells;
 };
 typedef struct terrain_t terrain;
-
-struct terr_list_t {
-    int count;
-    terrain *terrains;
-};
-typedef struct terr_list_t terr_list;
 
 int digits_in_number(int num)
 {
@@ -109,33 +106,45 @@ void print_terr_height(terrain terr)
     }
 }
 
-void init_terrain(terrain *ter)
+int init_terrain(terrain *ter)
 {
-    int *width = &(ter->widthMeter);
-    int *height = &(ter->heightMeter);
-
+    int width = 0;
+    int height = 0;
+    printf("Type -1 to abort (either on \'height\' or \'width\').\n");
     do
     {
         printf("New Terrain height X width in meters: ");
-        scanf("%d %d", height, width);
-        if(*height <= 0 || *width <= 0)
+        scanf("%d %d", &height, &width);
+        if(height <= 0 || width <= 0)
         {
-            if(*height <= 0)
+            if(height == -1 || width == -1)
+            {
+                printf("Operation aborted.\n\n");
+                return 0;
+            }
+            if(height <= 0)
+            {
                 printf("*height cannot be negative or zero\n");
-            if(*width <= 0)
+                printf("Type -1 if you want to abort\n");
+            }
+            if(width <= 0)
+            {
                 printf("*width cannot be negative or zero\n");   
-        }
-        
-    } while (*height <= 0 || *width <= 0);
+                printf("Type -1 if you want to abort\n");
+            }
+        }    
+    } while (height <= 0 || width <= 0);
     
+    ter->widthMeter = width;
+    ter->heightMeter = height;
 
-    cell **temp = (cell**) malloc((*height)*sizeof(cell*));
-    for(int i = 0; i < *height; i++)
-        temp[i] = (cell*) malloc((*width)*sizeof(cell));
+    cell **temp = (cell**) malloc((height)*sizeof(cell*));
+    for(int i = 0; i < height; i++)
+        temp[i] = (cell*) malloc((width)*sizeof(cell));
         
-    for(int i = 0; i < *height; i++)
+    for(int i = 0; i < height; i++)
     {
-        for(int j = 0; j < *width; j++)
+        for(int j = 0; j < width; j++)
         {
             printf("\n| Coordinates %dh %dw data\n", i, j);
             
@@ -169,6 +178,7 @@ void init_terrain(terrain *ter)
     }
     
     ter->cells = temp;
+    return 1;
 }
 
 void free_items(terrain *terr)
@@ -184,7 +194,7 @@ void write_file(char *filename, terrain *ter)
     FILE *fp = fopen(filename, "wb");
     if(fp == NULL)
     {
-        perror("Cannot open file");
+        perror("Cannot open file to write");
         exit(1);
     }
 
@@ -285,15 +295,17 @@ void ask_proceed()
 void new_terrain()
 {
     terrain terr;
-    init_terrain(&terr);
+    int init = init_terrain(&terr);
     getchar();
-    write_file("terrain.dat", &terr);
-    free_items(&terr);
+    if(init)
+    {
+        write_file("terrain.dat", &terr);
+        free_items(&terr);
+    }
 }
 
 int create_road(terrain *ter)
 {
-
     int x, y;
     int befX, befY;
     int count = 0;
@@ -398,6 +410,60 @@ int create_road(terrain *ter)
     return count;
 }
 
+void biker_jumps(terrain *ter)
+{
+    printf("\nBiker jumps:\n");
+    print_terr_type(*ter, 1);
+    printf("\n");
+    printf("Suitable jumps (coordinates):\n");
+
+    cell **temp = ter->cells;
+    for(int y = 0; y < ter->heightMeter; y++)
+    {
+        for(int x = ter->widthMeter - 1; x >= 4; x--)
+        {
+            if(temp[y][x].type == 1)
+            {
+                int areAllDes = 1;
+                for(int i = 1; i < 5; i++)
+                {
+                    if(temp[y][x-i].type != 1)
+                    {
+                        areAllDes = 0;
+                        break;
+                    }
+                }
+                if(areAllDes)
+                {
+                    float val = 180.0 / PI;
+                    float firstDeg = atanf(
+                        temp[y][x-1].height-temp[y][x].height) * val;
+                    float secondDeg = atanf(
+                        temp[y][x-2].height-temp[y][x-1].height) * val;
+                    float lastDeg = atanf(
+                        temp[y][x-4].height-temp[y][x-3].height) * val;
+                    
+                    if( (firstDeg >= 0 && firstDeg <= 45) &&
+                        (secondDeg >= 0 && secondDeg <= 45) &&
+                        (temp[y][x-3].height <= temp[y][x-2].height) &&
+                        (lastDeg <= 0 && lastDeg >= -80))
+                    {
+                        for(int l = x-4; l <= x; l++)
+                        {
+                            printf("(%d, %d)", l, y);
+                            if(l != x)
+                                printf(" <- ");
+                        }
+                        printf("\n");
+                        
+                        x -= 4;
+                    }
+                }
+            }
+        }
+    }
+}
+
 int main()
 {
     // choose option of the terrain 
@@ -418,7 +484,6 @@ int main()
         new_terrain();
     }
 
-    char c = 0;
     terrain *terr = read_file("terrain.dat");
     while(1)
     {
@@ -434,7 +499,7 @@ int main()
         printf("   |\n");
         printf("   +-> ");
 
-        c = getchar();
+        char c = getchar();
         getchar();
         switch(c)
         {
@@ -463,7 +528,9 @@ int main()
                 printf("\n");
                 break;
             case '5':
-                /* to be added */
+                printf("\n");
+                biker_jumps(terr);
+                printf("\n");
                 break;
         }
         if(c == '6')

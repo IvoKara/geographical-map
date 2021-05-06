@@ -8,7 +8,8 @@ if __name__ == "__main__":
         for j in range(0, int(sys.argv[2])):
             data[i].append([
                 rnd.uniform(0, 1000.00), 
-                rnd.randrange(0, 3), 
+                #rnd.randrange(0, 3), 
+                1,
                 rnd.uniform(0, 500.00)
             ])
 
