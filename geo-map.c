@@ -442,6 +442,7 @@ void biker_jumps(terrain *ter)
     print_terr_type(*ter, 1);
     printf("\n");
     printf("Suitable jumps (coordinates):\n");
+    int suitable_exist = 0;
 
     cell **temp = ter->cells;
     for(int y = 0; y < ter->heightMeter; y++)
@@ -483,11 +484,14 @@ void biker_jumps(terrain *ter)
                         printf("\n");
                         
                         x -= 4;
+                        suitable_exist = 1;
                     }
                 }
             }
         }
     }
+    if(!suitable_exist)
+        printf("  None.\n");
 }
 
 int main()
@@ -565,7 +569,7 @@ int main()
         {
             free_items(terr);
             free(terr);
-            printf("Bye.\n");
+            printf("   Bye.\n");
             break;
         }
     }
