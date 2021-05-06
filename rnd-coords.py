@@ -7,10 +7,10 @@ if __name__ == "__main__":
         data.append([])
         for j in range(0, int(sys.argv[2])):
             data[i].append([
-                rnd.uniform(0, 1000.00), 
+                round(rnd.uniform(0, 5.00), 2), 
                 #rnd.randrange(0, 3), 
                 1,
-                rnd.uniform(0, 500.00)
+                round(rnd.uniform(0, 500.00), 2)
             ])
 
     print(len(data), len(data[0]))

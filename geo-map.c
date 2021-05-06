@@ -19,6 +19,8 @@ struct terrain_t {
 };
 typedef struct terrain_t terrain;
 
+/*additional function*/
+//how many digits are in one number
 int digits_in_number(int num)
 {
     int len = 0;
@@ -31,6 +33,8 @@ int digits_in_number(int num)
     return len;
 }
 
+// print map of the given terrain by type
+// optional functionality of printing coordinate system with the map
 void print_terr_type(terrain terr, int use_coord)
 {
     int wdigs = digits_in_number(terr.widthMeter);
@@ -88,6 +92,7 @@ void print_terr_type(terrain terr, int use_coord)
     }
 }
 
+// print map of the given terrain by heights
 void print_terr_height(terrain terr)
 {
     float longest = 0;
@@ -106,6 +111,8 @@ void print_terr_height(terrain terr)
     }
 }
 
+//create new terrain by given user input
+//check if data is correct for every input
 int init_terrain(terrain *ter)
 {
     int width = 0;
@@ -181,6 +188,7 @@ int init_terrain(terrain *ter)
     return 1;
 }
 
+//free allocated memory in heap for terrain 
 void free_items(terrain *terr)
 {
     cell **cells = terr->cells;
@@ -189,6 +197,8 @@ void free_items(terrain *terr)
     free(cells);
 }
 
+//write terrain data to a binary file
+//as it is required in the task
 void write_file(char *filename, terrain *ter)
 {
     FILE *fp = fopen(filename, "wb");
@@ -228,6 +238,8 @@ void write_file(char *filename, terrain *ter)
     fclose(fp);
 }
 
+//read terrrain data from binary file
+//and return whole terrain structure
 terrain *read_file(char *filename)
 {
     FILE *fp = fopen(filename, "rb");
@@ -277,6 +289,10 @@ terrain *read_file(char *filename)
     return terr;
 }
 
+/*additional function*/
+//blocks the program when no terrain data is found
+//to ask the user if he wants to create new terrain data
+// *if 'y' -> proceed; if 'n' -> stop the program
 void ask_proceed()
 {
     int c;
@@ -292,6 +308,10 @@ void ask_proceed()
     }
 }
 
+/*additional function*/
+//again used for siplicity 
+//when the user chooses to create new terrain data
+//and save it in binary file
 void new_terrain()
 {
     terrain terr;
@@ -304,6 +324,10 @@ void new_terrain()
     }
 }
 
+//create/build road (type '3')
+//as wanted in the task
+//have to start the creation from the most outer parts
+//of the coordinate system ('borders')
 int create_road(terrain *ter)
 {
     int x, y;
@@ -410,6 +434,8 @@ int create_road(terrain *ter)
     return count;
 }
 
+//fulfill the requirements of the bikers about their morning jumps
+//and return the coordinates one by one of the proper jumps
 void biker_jumps(terrain *ter)
 {
     printf("\nBiker jumps:\n");
@@ -466,7 +492,7 @@ void biker_jumps(terrain *ter)
 
 int main()
 {
-    // choose option of the terrain 
+    // check wether terrain data exists in binary file
     FILE *dat = fopen("terrain.dat", "rb");
     if(dat != NULL)
     {
@@ -485,6 +511,8 @@ int main()
     }
 
     terrain *terr = read_file("terrain.dat");
+
+    //choose option of the terrain listed bellow
     while(1)
     {
         printf("+------------------------------------+\n");
