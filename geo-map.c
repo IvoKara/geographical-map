@@ -132,12 +132,10 @@ int init_terrain(terrain *ter)
             if(height <= 0)
             {
                 printf("*height cannot be negative or zero\n");
-                printf("Type -1 if you want to abort\n");
             }
             if(width <= 0)
             {
                 printf("*width cannot be negative or zero\n");   
-                printf("Type -1 if you want to abort\n");
             }
         }    
     } while (height <= 0 || width <= 0);
