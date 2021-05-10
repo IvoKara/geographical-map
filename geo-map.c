@@ -312,7 +312,7 @@ void ask_proceed()
 //again used for siplicity 
 //when the user chooses to create new terrain data
 //and save it in binary file
-void new_terrain()
+int new_terrain()
 {
     terrain terr;
     int init = init_terrain(&terr);
@@ -322,6 +322,8 @@ void new_terrain()
         write_file("terrain.dat", &terr);
         free_items(&terr);
     }
+
+    return init;
 }
 
 //create/build road (type '3')
@@ -505,13 +507,19 @@ int main()
         {
             fclose(dat);
             ask_proceed();
-            new_terrain();
+            if(!new_terrain())
+            {
+                exit(1);
+            }
         }
     }
     else
     {
         ask_proceed();
-        new_terrain();
+        if(!new_terrain())
+        {
+            exit(1);
+        }
     }
 
     terrain *terr = read_file("terrain.dat");
@@ -550,8 +558,10 @@ int main()
                 printf("\n");
                 break;
             case '3':
-                new_terrain();
-                terr = read_file("terrain.dat");
+                if(new_terrain())
+                {
+                    terr = read_file("terrain.dat");
+                }
                 break;
             case '4':
                 printf("\n");
