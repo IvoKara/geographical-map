@@ -509,7 +509,7 @@ int main()
             ask_proceed();
             if(!new_terrain())
             {
-                exit(1);
+                exit(0);
             }
         }
     }
@@ -518,7 +518,7 @@ int main()
         ask_proceed();
         if(!new_terrain())
         {
-            exit(1);
+            exit(0);
         }
     }
 
@@ -539,49 +539,52 @@ int main()
         printf("   |\n");
         printf("   +-> ");
 
-        char c = getchar();
+        int n;
+        scanf("%d", &n);
         getchar();
-        switch(c)
+        switch(n)
         {
-            case '1':
+            case 1:
                 printf("\n");
                 printf("Map of types %dx%d:\n", 
                     terr->heightMeter, terr->widthMeter);
                 print_terr_type(*terr, 0);
                 printf("\n");
                 break;
-            case '2':
+            case 2:
                 printf("\n");
                 printf("Map of heights %dx%d:\n", 
                     terr->heightMeter, terr->widthMeter);
                 print_terr_height(*terr);
                 printf("\n");
                 break;
-            case '3':
+            case 3:
                 if(new_terrain())
                 {
                     terr = read_file("terrain.dat");
                 }
                 break;
-            case '4':
+            case 4:
                 printf("\n");
                 create_road(terr);
                 getchar();
                 printf("\n");
                 break;
-            case '5':
+            case 5:
                 printf("\n");
                 biker_jumps(terr);
                 printf("\n");
                 break;
-        }
-        if(c == '6')
-        {
-            free_items(terr);
-            free(terr);
-            printf("   Bye.\n");
-            break;
-        }
+            case 6:
+                free_items(terr);
+                free(terr);
+                printf("   Bye.\n");
+                exit(0);
+                break;
+            default:
+                printf("\nChoose between the given options\n");
+                break;
+        }   
     }
     
     return 0;
