@@ -512,6 +512,7 @@ int main()
                 exit(0);
             }
         }
+        fclose(dat);
     }
     else
     {
