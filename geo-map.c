@@ -438,18 +438,18 @@ int create_road(terrain *ter)
 
 //fulfill the requirements of the bikers about their morning jumps
 //and return the coordinates one by one of the proper jumps
-void biker_jumps(terrain *ter)
+void biker_jumps(terrain ter)
 {
     printf("\nBiker jumps:\n");
-    print_terr_type(*ter, 1);
+    print_terr_type(ter, 1);
     printf("\n");
     printf("Suitable jumps (coordinates):\n");
     int suitable_exist = 0;
 
-    cell **temp = ter->cells;
-    for(int y = 0; y < ter->heightMeter; y++)
+    cell **temp = ter.cells;
+    for(int y = 0; y < ter.heightMeter; y++)
     {
-        for(int x = ter->widthMeter - 1; x >= 4; x--)
+        for(int x = ter.widthMeter - 1; x >= 4; x--)
         {
             if(temp[y][x].type == 1)
             {
@@ -573,7 +573,7 @@ int main()
                 break;
             case 5:
                 printf("\n");
-                biker_jumps(terr);
+                biker_jumps(*terr);
                 printf("\n");
                 break;
             case 6:
