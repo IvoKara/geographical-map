@@ -24,4 +24,4 @@ Make the following manipulations:
 Must use dynammically allocated data strutures to store the data and dynamic array for the map
 
 ## Documentation
-Docs in Bulgarian can find [here](https://docs.google.com/document/d/1m3Js1-4fzH1UaWE589b6JFQxRT8ex8DbfF1Dd-1rgKM/edit?usp=sharing).
+Docs and description of the program in Bulgarian can find [here](https://docs.google.com/document/d/1m3Js1-4fzH1UaWE589b6JFQxRT8ex8DbfF1Dd-1rgKM/edit?usp=sharing).
